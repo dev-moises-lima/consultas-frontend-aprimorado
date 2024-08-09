@@ -3,25 +3,52 @@ import { ModalDeCadastroDePaciente } from "./modal-de-cadastro-de-paciente";
 import { TabelaDePacientes } from "./tabela-de-pacientes";
 import { Button } from "react-bootstrap";
 import { api } from "../../lib/axios.ts";
-import { Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos";
+import { ErroDeRequisicao, Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos";
 import { Notificacao } from "../../components/notificacao";
 import { AxiosError } from "axios";
+import { ModalDeNotificacaoDeErro } from "../../components/modal-notificacao-de-erro.tsx";
+
+interface PaginaPrincipalProps
+{
+  setMensagemDeErroDeRequisicao: (mensagem: string) => void
+  mensagem: string
+}
 
 export function PaginaPrincipal() {
   const [modalDeCadastroAberto, setModalDeCadastroAberto] = useState(false)
   const [controleDeAtualizacaoDePacientes,setControleDeAtualizacaoDePacientes] = useState(false)
   const [pacientes, setPacientes] = useState<Paciente[]>()
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
+  const [mensagemDeErroDeRequisicao, setMensagemDeErroDeRequisicao] = useState("")
 
   async function obterPacientes() {
     try {
       const resposta = await api.get("pacientes")
       setPacientes(resposta.data)
-      console.log(resposta);
-      
+      setMensagemDeErroDeRequisicao("")
+      console.log(resposta)
     } catch (erro: any) {
       const axiosError: AxiosError = erro
-      console.log(axiosError.code)
+      const codigoDeErro = axiosError.code
+
+      switch(codigoDeErro)
+      {
+        case "ERR_BAD_REQUEST":
+          setMensagemDeErroDeRequisicao("Recursos não encontrados no servidor")
+          break
+        case "ERR_BAD_RESPONSE":
+          setMensagemDeErroDeRequisicao("Erro interno do servidor")
+          break
+        case "ERR_NETWORK":
+          setMensagemDeErroDeRequisicao("Erro de conexão com o servidor")
+          break
+        default:
+          setMensagemDeErroDeRequisicao(codigoDeErro!)
+      }
+
+      setTimeout(() => {
+        obterPacientes()
+      }, 5000)
     }
   }
 
@@ -74,6 +101,11 @@ export function PaginaPrincipal() {
         setMensagens={setMensagens}
       />
       <TabelaDePacientes pacientes={pacientes} />
+      {mensagemDeErroDeRequisicao && (
+        <ModalDeNotificacaoDeErro>
+          {mensagemDeErroDeRequisicao}
+        </ModalDeNotificacaoDeErro>
+      )}
     </>
   );
 }

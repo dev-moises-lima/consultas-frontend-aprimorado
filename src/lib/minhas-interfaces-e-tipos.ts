@@ -37,6 +37,8 @@ export interface ErrosDeRealizacaoDeConsulta {
   temperatura?: string[]
 }
 
+export type ErroDeRequisicao = "ERR_BAD_REQUEST" | "ERR_NETWORK" | "ERR_BAD_RESPONSE"
+
 export type Mensagem = [string, "erro" | "sucesso", string]
 
 export type CondicaoDoPaciente = "Sintomas insuficientes" | "Potencial infectado" | "Possível infectado" | null
