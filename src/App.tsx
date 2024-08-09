@@ -17,7 +17,7 @@ const router = createBrowserRouter([
 export function App() {
   return (
     <main 
-      className="conteiner-fluid mx-auto px-4 mt-5"
+      className="conteiner-fluid mx-auto px-4 py-5"
       style={{
         maxWidth: "1400px"
       }}

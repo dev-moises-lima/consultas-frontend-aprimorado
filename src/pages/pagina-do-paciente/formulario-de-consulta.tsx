@@ -120,9 +120,8 @@ export function FormularioDeConsulta({
       >
         {!exibindoCheckBoxesDeSintomas ? (
           <>
-            <Row className="mb-3">
+            <Stack gap={3}>
               <Form.Group
-                as={Col}
                 controlId="pressao_arterial_sistolica"
               >
                 <FloatingLabel
@@ -144,7 +143,6 @@ export function FormularioDeConsulta({
                 )}
               </Form.Group>
               <Form.Group
-                as={Col}
                 controlId="pressao_arterial_diastolica"
               >
                 <FloatingLabel
@@ -165,7 +163,6 @@ export function FormularioDeConsulta({
                 )}
               </Form.Group>
               <Form.Group
-                as={Col}
                 controlId="frequencia_cardiaca"
               >
                 <FloatingLabel
@@ -186,7 +183,6 @@ export function FormularioDeConsulta({
                 )}
               </Form.Group>
               <Form.Group
-                as={Col}
                 controlId="temperatura"
               >
                 <FloatingLabel
@@ -207,7 +203,6 @@ export function FormularioDeConsulta({
                 )}
               </Form.Group>
               <Form.Group
-                as={Col}
                 controlId="respiracao"
               >
                 <FloatingLabel 
@@ -227,11 +222,11 @@ export function FormularioDeConsulta({
                   </Form.Text>
                 )}
               </Form.Group>
-            </Row>
+            </Stack>
           </>
         ): (
           <>
-            <Row className="mb-4">
+            <Row className="mb-4 justify-content-evenly">
               <Col>
                 <Stack gap={1}>
                   <Form.Check
@@ -264,10 +259,6 @@ export function FormularioDeConsulta({
                     label="Tosse"
                     name="tosse"
                   />
-                </Stack>
-              </Col>
-              <Col>
-                <Stack gap={1}>
                   <Form.Check
                     id="dor_de_cabeca"
                     type="checkbox"
@@ -280,6 +271,10 @@ export function FormularioDeConsulta({
                     label="Dores no corpo"
                     name="dores_no_corpo"
                   />
+                </Stack>
+              </Col>
+              <Col>
+                <Stack gap={1}>
                   <Form.Check
                     id="mal_estar_geral"
                     type="checkbox"
@@ -298,10 +293,6 @@ export function FormularioDeConsulta({
                     label="Dificuldade de Respirar"
                     name="dificuldade_de_respirar"
                   />
-                </Stack>
-              </Col>
-              <Col>
-                <Stack gap={1}>
                   <Form.Check
                     id="falta_de_paladar"
                     type="checkbox"
