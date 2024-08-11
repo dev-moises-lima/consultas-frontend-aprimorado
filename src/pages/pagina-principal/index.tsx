@@ -1,49 +1,50 @@
-import { useEffect, useState } from "react";
-import { ModalDeCadastroDePaciente } from "./modal-de-cadastro-de-paciente";
-import { TabelaDePacientes } from "./tabela-de-pacientes";
-import { Button } from "react-bootstrap";
-import { api } from "../../lib/axios.ts";
-import { ErroDeRequisicao, Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos";
-import { Notificacao } from "../../components/notificacao";
-import { AxiosError } from "axios";
-import { ModalDeNotificacaoDeErro } from "../../components/modal-notificacao-de-erro.tsx";
+import { useEffect, useState } from "react"
+import { ModalDeCadastroDePaciente } from "./modal-de-cadastro-de-paciente"
+import { TabelaDePacientes } from "./tabela-de-pacientes"
+import { Button } from "react-bootstrap"
+import { api } from "../../lib/axios.ts"
+import { Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
+import { Notificacao } from "../../components/notificacao"
+import { AxiosError } from "axios"
 
 interface PaginaPrincipalProps
 {
-  setMensagemDeErroDeRequisicao: (mensagem: string) => void
-  mensagem: string
+  setMensagemDeErro: (mensagem: string) => void
 }
 
-export function PaginaPrincipal() {
+export function PaginaPrincipal({
+  setMensagemDeErro,
+}: PaginaPrincipalProps) {
   const [modalDeCadastroAberto, setModalDeCadastroAberto] = useState(false)
   const [controleDeAtualizacaoDePacientes,setControleDeAtualizacaoDePacientes] = useState(false)
   const [pacientes, setPacientes] = useState<Paciente[]>()
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
-  const [mensagemDeErroDeRequisicao, setMensagemDeErroDeRequisicao] = useState("")
-
+  
   async function obterPacientes() {
     try {
       const resposta = await api.get("pacientes")
       setPacientes(resposta.data)
-      setMensagemDeErroDeRequisicao("")
+      setMensagemDeErro("")
       console.log(resposta)
-    } catch (erro: any) {
-      const axiosError: AxiosError = erro
+    } catch (erro) {
+      console.log(erro);
+      
+      const axiosError = erro as AxiosError
       const codigoDeErro = axiosError.code
 
       switch(codigoDeErro)
       {
         case "ERR_BAD_REQUEST":
-          setMensagemDeErroDeRequisicao("Recursos não encontrados no servidor")
+          setMensagemDeErro("Recursos não encontrados no servidor")
           break
         case "ERR_BAD_RESPONSE":
-          setMensagemDeErroDeRequisicao("Erro interno do servidor")
+          setMensagemDeErro("Erro na resposta do servidor")
           break
         case "ERR_NETWORK":
-          setMensagemDeErroDeRequisicao("Erro de conexão com o servidor")
+          setMensagemDeErro("Erro de conexão com o servidor")
           break
         default:
-          setMensagemDeErroDeRequisicao(codigoDeErro!)
+          setMensagemDeErro(axiosError.message)
       }
 
       setTimeout(() => {
@@ -54,6 +55,7 @@ export function PaginaPrincipal() {
 
   useEffect(() => {
     obterPacientes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controleDeAtualizacaoDePacientes])
 
   function removerMensagem(codigoDaMensagem: string) {
@@ -99,13 +101,9 @@ export function PaginaPrincipal() {
         }
         mensagens={mensagens}
         setMensagens={setMensagens}
+        setMensagemDeErro={setMensagemDeErro}
       />
       <TabelaDePacientes pacientes={pacientes} />
-      {mensagemDeErroDeRequisicao && (
-        <ModalDeNotificacaoDeErro>
-          {mensagemDeErroDeRequisicao}
-        </ModalDeNotificacaoDeErro>
-      )}
     </>
   );
 }

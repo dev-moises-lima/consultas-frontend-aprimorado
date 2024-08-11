@@ -34,11 +34,27 @@ export function FormularioDeConsulta({
   const statusDaFrequenciaCardiaca = calcularStatusDaCondicao("frequência cardíaca",Number(frequenciaCardiaca))
   const statusDaRespiracao = calcularStatusDaCondicao("respiracao", Number(respiracao))
   const statusDaTemperatura = calcularStatusDaCondicao("temperatura", Number(temperatura))
-  const formularioValido = validarCondicao(pressaoArterialSistolica) &&
-    validarCondicao(pressaoArterialDiastolica) &&
-    validarCondicao(temperatura) &&
-    validarCondicao(frequenciaCardiaca) &&
-    validarCondicao(respiracao)
+  const camposDoFormularioValidos = validarCamposDoFormulário()
+
+  function validarCamposDoFormulário() {
+    if(!validarCondicao(pressaoArterialSistolica)) {
+      return false
+    }
+    if(!validarCondicao(pressaoArterialDiastolica)) {
+      return false
+    }
+    if(!validarCondicao(temperatura)) {
+      return false
+    }
+    if(!validarCondicao(frequenciaCardiaca)) {
+      return false
+    }
+    if(!validarCondicao(respiracao)) {
+      return false
+    }
+
+    return true
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     setBoatoFinalizarAtivo(false)
@@ -125,7 +141,13 @@ export function FormularioDeConsulta({
                 controlId="pressao_arterial_sistolica"
               >
                 <FloatingLabel
-                  label="Pressão Arterial Sistólica"
+                  label={(<>
+                    Pressão Arterial Sistólica {statusDaPressaoArterialSistolica.length > 0 && (
+                      <span className={`text-${statusDaPressaoArterialSistolica[1]}`}>
+                        {`(${statusDaPressaoArterialSistolica[0]})`}
+                      </span>
+                    )}
+                  </>)}
                 >
                   <Form.Control
                     size="sm"
@@ -136,17 +158,18 @@ export function FormularioDeConsulta({
                     onChange={event => atualizarValorDaCondicao(event.target.value, setPressaoArterialSistolica)}
                   />
                 </FloatingLabel>
-                {statusDaPressaoArterialSistolica && (
-                  <Form.Text className={`text-${statusDaPressaoArterialSistolica[1]}`}>
-                    {statusDaPressaoArterialSistolica[0]}
-                  </Form.Text>
-                )}
               </Form.Group>
               <Form.Group
                 controlId="pressao_arterial_diastolica"
               >
                 <FloatingLabel
-                  label="Pressão Arterial Diastólica"
+                  label={(<>
+                    Pressão Arterial Diastólica {statusDaPressaoArterialDiastolica.length > 0 && (
+                      <span className={`text-${statusDaPressaoArterialDiastolica[1]}`}>
+                        {`(${statusDaPressaoArterialDiastolica[0]})`}
+                      </span>
+                    )}
+                  </>)}
                 >
                   <Form.Control
                     placeholder="Pressão Arterial Diastólica"
@@ -156,17 +179,18 @@ export function FormularioDeConsulta({
                     onChange={event => atualizarValorDaCondicao(event.target.value, setPressaoArterialDiastolica)}
                   />
                 </FloatingLabel>
-                {statusDaPressaoArterialDiastolica && (
-                  <Form.Text className={`text-${statusDaPressaoArterialDiastolica[1]}`}>
-                    {statusDaPressaoArterialDiastolica[0]}
-                  </Form.Text>
-                )}
               </Form.Group>
               <Form.Group
                 controlId="frequencia_cardiaca"
               >
                 <FloatingLabel
-                  label="Frequência cardíaca"
+                  label={(<>
+                    Frequência Cardíaca {statusDaFrequenciaCardiaca.length > 0 && (
+                      <span className={`text-${statusDaFrequenciaCardiaca[1]}`}>
+                        {`(${statusDaFrequenciaCardiaca[0]})`}
+                      </span>
+                    )}
+                  </>)}
                 >
                   <Form.Control
                     placeholder="Frequência cardíaca"
@@ -176,17 +200,18 @@ export function FormularioDeConsulta({
                     onChange={event => atualizarValorDaCondicao(event.target.value, setFrequenciaCardiaca)}
                   />
                 </FloatingLabel>
-                {statusDaFrequenciaCardiaca && (
-                  <Form.Text className={`text-${statusDaFrequenciaCardiaca[1]}`}>
-                    {statusDaFrequenciaCardiaca[0]}
-                  </Form.Text>
-                )}
               </Form.Group>
               <Form.Group
                 controlId="temperatura"
               >
                 <FloatingLabel
-                  label="Temperatura"
+                  label={(<>
+                    Pressão Arterial Sistólica {statusDaTemperatura.length > 0 && (
+                      <span className={`text-${statusDaTemperatura[1]}`}>
+                        {`(${statusDaTemperatura[0]})`}
+                      </span>
+                    )}
+                  </>)}
                 >
                   <Form.Control
                     placeholder="Temperatura"
@@ -196,17 +221,18 @@ export function FormularioDeConsulta({
                     onChange={event => atualizarValorDaCondicao(event.target.value, setTemperatura)}
                   />
                 </FloatingLabel>
-                {statusDaTemperatura && (
-                  <Form.Text className={`text-${statusDaTemperatura[1]}`}>
-                    {statusDaTemperatura[0]}
-                  </Form.Text>
-                )}
               </Form.Group>
               <Form.Group
                 controlId="respiracao"
               >
                 <FloatingLabel 
-                  label="Respiração"
+                  label={(<>
+                    Pressão Arterial Sistólica {statusDaRespiracao.length > 0 && (
+                      <span className={`text-${statusDaRespiracao[1]}`}>
+                        {`(${statusDaRespiracao[0]})`}
+                      </span>
+                    )}
+                  </>)}
                 >
                 <Form.Control
                   placeholder="Respiração"
@@ -216,11 +242,6 @@ export function FormularioDeConsulta({
                   onChange={event => atualizarValorDaCondicao(event.target.value, setRespiracao)}
                 />
                 </FloatingLabel>
-                {statusDaRespiracao && (
-                  <Form.Text className={`text-${statusDaRespiracao[1]}`}>
-                    {statusDaRespiracao[0]}
-                  </Form.Text>
-                )}
               </Form.Group>
             </Stack>
           </>
@@ -347,7 +368,7 @@ export function FormularioDeConsulta({
       {!exibindoCheckBoxesDeSintomas && (
         <div className="mt-4">
            <Button 
-              disabled={!formularioValido} 
+              disabled={!camposDoFormularioValidos} 
               className="me-3" 
               onClick={exibirCheckBoxesDeSintomas}
             >

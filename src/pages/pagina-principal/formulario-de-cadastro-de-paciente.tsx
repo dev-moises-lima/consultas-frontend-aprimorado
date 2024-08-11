@@ -12,10 +12,12 @@ import {
   ErrosDeCadastroDePaciente,
   Mensagem,
 } from "../../lib/minhas-interfaces-e-tipos"
+import { AxiosError } from "axios";
 
 interface FormularioDeCadastroDePacienteProps {
   fecharModalDeCadastro: () => void
   setMensagens: (mensagens: Mensagem[]) => void
+  setMensagemDeErro: (mensagen: string) => void
   mensagens: Mensagem[]
   emitirMensagemDeAtualizacaoDePacientes: () => void
 }
@@ -25,6 +27,7 @@ export function FormularioDeCadastroDePaciente({
   mensagens,
   setMensagens,
   emitirMensagemDeAtualizacaoDePacientes,
+  setMensagemDeErro,
 }: FormularioDeCadastroDePacienteProps) {
   const [formularioValidado, setFormularioValidado] = useState(false)
   const [nome, setNome] = useState("")
@@ -81,9 +84,10 @@ export function FormularioDeCadastroDePaciente({
 
     dados.set("data_de_nascimento", dataDeNascimento)
 
-    api
-    .post("pacientes", dados)
+    api.post("pacientese", dados)
       .then((resposta) => {
+        console.log(resposta);
+        
         setMensagens([
           [resposta.data.mensagem, "sucesso", generateUUID()],
           ...mensagens,
@@ -92,23 +96,47 @@ export function FormularioDeCadastroDePaciente({
         fecharModalDeCadastro()
         emitirMensagemDeAtualizacaoDePacientes()
       })
-      .catch((resposta) => {
-        const erros: ErrosDeCadastroDePaciente = resposta.response.data.errors;
-
-        let novasMensagens: Mensagem[] = []
-
-        for (const mensagensDeErro of Object.values(erros)) {
-          const novasMensagensDeErro = mensagensDeErro.map(
-            (mensagemDeErro: string) => {
-              return [mensagemDeErro, "erro", generateUUID()]
-            }
-          )
-
-          novasMensagens = [...novasMensagens, ...novasMensagensDeErro]
-        }
-
-        setMensagens([...novasMensagens, ...mensagens])
+      .catch((erro) => {
         fecharModalDeCadastro()
+        const axiosError = erro as AxiosError
+        
+        switch(axiosError.code)
+        {
+          case "ERR_BAD_REQUEST": {
+            if(axiosError.response?.status === 422) {
+              const erros: ErrosDeCadastroDePaciente = erro.response.data.errors
+
+              let novasMensagens: Mensagem[] = []
+
+              for (const mensagensDeErro of Object.values(erros)) {
+                const novasMensagensDeErro = mensagensDeErro.map(
+                  (mensagemDeErro: string) => {
+                    return [mensagemDeErro, "erro", generateUUID()]
+                  }
+                )
+
+                novasMensagens = [...novasMensagens, ...novasMensagensDeErro]
+              }
+
+            setMensagens([...novasMensagens, ...mensagens])
+            } else {
+              setMensagemDeErro("Erro na requisição ao servidor")
+            }
+            break
+          }
+          case "ERR_BAD_RESPONSE":
+            setMensagemDeErro("Erro na resposta do servidor")
+            break
+          case "ERR_NETWORK":
+            setMensagemDeErro("Erro de conexão com o servidor")
+            break
+          default:
+            setMensagemDeErro(axiosError.message)  
+        }
+        
+        setTimeout(() => {
+          setMensagemDeErro("")
+        }, 5000)
       })
   }
 

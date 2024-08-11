@@ -20,7 +20,7 @@ export function TabelaDeConsultas({
   }
 
   return (
-    <section className="p-4 bg-secondary-subtle rounded-2 mt-4">
+    <section className="p-4 bg-secondary-subtle rounded-2 mt-3">
       {consultas === undefined ? (
         <h2 className="text-center text-info">Carregando Consultas...</h2>
       ) : consultas.length === 0 ? (

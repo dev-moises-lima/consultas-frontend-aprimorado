@@ -1,5 +1,22 @@
 import moment from "moment"
-import { CondicaoDoPaciente } from "./minhas-interfaces-e-tipos";
+import { CondicaoDoPaciente } from "./minhas-interfaces-e-tipos"
+import { AxiosError } from "axios"
+
+export function obterMensagemDeErro (axiosError: AxiosError)
+{
+  switch(axiosError.code)
+  {
+    case "ERR_BAD_REQUEST":
+      return "Recursos não encontrados no servidor"
+    case "ERR_BAD_RESPONSE":
+      return "Erro na resposta do servidor"
+    case "ERR_NETWORK":
+      return "Erro de conexão com o servidor"
+    default:
+      return axiosError.message
+  }
+}
+
 
 export function inverterData(data: string, separador: string) {
   return data.split(separador).reverse().join(separador)

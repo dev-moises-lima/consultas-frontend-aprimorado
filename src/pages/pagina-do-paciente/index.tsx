@@ -1,17 +1,26 @@
-import { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
-import { BiPlus } from "react-icons/bi";
-import { GrReturn } from "react-icons/gr";
-import { FormularioDeConsulta } from "./formulario-de-consulta";
+import { useEffect, useState } from "react"
+import { Button } from "react-bootstrap"
+import { BiPlus } from "react-icons/bi"
+import { GrReturn } from "react-icons/gr"
+import { FormularioDeConsulta } from "./formulario-de-consulta"
 import { InfoPaciente } from "./info-paciente";
-import { TabelaDeConsultas } from "./tabela-de-consultas";
-import { Consulta, Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos";
-import { api } from "../../lib/axios";
-import { useNavigate, useParams } from "react-router-dom";
-import { Notificacao } from "../../components/notificacao";
-import { AxiosError } from "axios";
+import { TabelaDeConsultas } from "./tabela-de-consultas"
+import { Consulta, Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
+import { api } from "../../lib/axios"
+import { useNavigate, useParams } from "react-router-dom"
+import { Notificacao } from "../../components/notificacao"
+import { AxiosError } from "axios"
+import { obterMensagemDeErro } from "../../lib/minhas-funcoes"
 
-export function PaginaDoPaciente() {
+
+interface PaginaDoPacienteProps
+{
+  setMensagemDeErro: (mensagem: string) => void
+}
+
+export function PaginaDoPaciente({
+  setMensagemDeErro,
+}: PaginaDoPacienteProps) {
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
   const [exibindoFormularioDeConsulta, setMostrarFormularioDeConsulta] = useState(false)
   const [paciente, setPaciente] = useState<Paciente>()
@@ -20,6 +29,13 @@ export function PaginaDoPaciente() {
   const [controleDeAtualizacaoDoPaciente, setControleDeAtualizacaoDoPaciente] = useState(false)
   const { pacienteId } = useParams()
   const navigate = useNavigate()
+
+
+  if(!pacienteExiste) {
+    setTimeout(() => {
+      navigate("/")
+    }, 3000)
+  }
 
   function exibirFormularioDeConsulta() {
     setMostrarFormularioDeConsulta(true)
@@ -41,38 +57,55 @@ export function PaginaDoPaciente() {
     setControleDeAtualizacaoDoPaciente(!controleDeAtualizacaoDoPaciente)
   }
 
-  useEffect(() => {
-    async function obterPaciente() {
-      try {
-        const resposta = await api.get(`pacientes/${pacienteId}`)
-  
-        setPaciente(resposta.data)
-  
-      } catch (erro) {
-        setPacienteExiste(false)
-  
-        setTimeout(() => {
-          navigate("/")
-        }, 3000)
-  
-        console.log(erro)
-      }
-    }
-    
-    async function obterConsultas() {
-      try {
-        const resposta = await api.get(`pacientes/${pacienteId}/consultas`)
-        setConsultas(resposta.data)
-      } catch (erro: any) {
-        const axiosError: AxiosError = erro
-        console.log(axiosError.request)
-      }
-    }
+  async function obterPaciente() {
+    try {
+      const resposta = await api.get(`pacientes/${pacienteId}`)
 
+      setPaciente(resposta.data)
+      setMensagemDeErro("")
+      obterConsultas()
+    } catch (erro) {
+      console.log(erro)
+      
+      const axiosError = erro as AxiosError
+      console.log(axiosError.response?.status);
+      
+      if(axiosError.code == "ERR_BAD_REQUEST" && axiosError.response?.status == 400) {
+        setPacienteExiste(false)
+      } else {
+        setMensagemDeErro(obterMensagemDeErro(axiosError))
+        setTimeout(() => {
+          obterPaciente()
+        }, 3000)
+      }
+    }
+  }
+  
+  async function obterConsultas() {
+    try {
+      const resposta = await api.get(`pacientes/${pacienteId}/consultas`)
+      setMensagemDeErro("")
+      setConsultas(resposta.data)
+    } catch (erro) {
+      console.log(erro)
+      const axiosError = erro as AxiosError
+      
+      if(axiosError.code == "ERR_BAD_REQUEST" && axiosError.response?.status == 400) {
+        setPacienteExiste(false)
+      } else {
+        setMensagemDeErro(obterMensagemDeErro(axiosError))
+        setTimeout(() => {
+          obterPaciente()
+        }, 3000)
+      }
+    }
+  }
+
+  useEffect(() => {
     obterPaciente()
-    obterConsultas()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controleDeAtualizacaoDoPaciente])
+  }, [controleDeAtualizacaoDoPaciente, pacienteId])
+
 
   return (
     <>
@@ -122,9 +155,9 @@ export function PaginaDoPaciente() {
           />
         </>
       ) : (
-        <div className="p-3 p-md-4 bg-secondary-subtle rounded-2 mt-4">
+        <div className="p-4 bg-secondary-subtle rounded-2">
           <h1 className="text-info text-center">
-            {pacienteExiste ? "Carregando dados do paciente..." : "O paciente com o id " + pacienteId + " não existe."}
+            {pacienteExiste ? "Carregando dados do paciente..." : `O paciente com o id ${pacienteId} não existe`}
           </h1>
         </div>
       )}

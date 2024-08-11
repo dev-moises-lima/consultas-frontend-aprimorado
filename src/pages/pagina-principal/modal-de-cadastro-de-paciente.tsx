@@ -8,6 +8,7 @@ interface ModalDeCadastroDePacienteProps {
   setMensagens: (mensagens: Mensagem[]) => void
   mensagens: Mensagem[]
   emitirMensagemDeAtualizacaoDePacientes: () => void
+  setMensagemDeErro: (mensagen: string) => void
 }
 
 export function ModalDeCadastroDePaciente({
@@ -16,6 +17,7 @@ export function ModalDeCadastroDePaciente({
   mensagens,
   setMensagens,
   emitirMensagemDeAtualizacaoDePacientes,
+  setMensagemDeErro,
 }: ModalDeCadastroDePacienteProps) {
   return (
     <Modal
@@ -25,7 +27,7 @@ export function ModalDeCadastroDePaciente({
       show={modalDeCadastroAberto}
       onHide={fecharModalDeCadastro}
     >
-      <Modal.Header closeButton>
+      <Modal.Header>
         <Modal.Title>Formulário de Cadastro de Paciente</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -36,6 +38,7 @@ export function ModalDeCadastroDePaciente({
           emitirMensagemDeAtualizacaoDePacientes={
             emitirMensagemDeAtualizacaoDePacientes
           }
+          setMensagemDeErro={setMensagemDeErro}
         />
       </Modal.Body>
     </Modal>
