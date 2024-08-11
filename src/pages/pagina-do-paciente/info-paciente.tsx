@@ -6,10 +6,12 @@ import { obterCorDaCondicao } from "../../lib/minhas-funcoes";
 
 interface InfoPacienteProps {
   paciente: Paciente
+  sectionRef: React.MutableRefObject<null>
 }
 
 export function InfoPaciente({
-  paciente
+  paciente,
+  sectionRef
 } : InfoPacienteProps) {
   const [fotoCarregada, setFotoCarregada] = useState(false)
   const hoje = moment()
@@ -22,7 +24,7 @@ export function InfoPaciente({
   
   
   return (
-    <section className="p-3 bg-info-subtle rounded-2">
+    <section ref={sectionRef} className="p-3 bg-info-subtle rounded-2">
       <Row className="align-items-center">
         <Col xs={9} className="border-3">
         <Stack gap={3}>

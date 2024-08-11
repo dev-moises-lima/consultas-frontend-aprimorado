@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Button, Col, FloatingLabel, Form, Row, Stack } from "react-bootstrap";
 import { calcularStatusDaCondicao, generateUUID } from "../../lib/minhas-funcoes";
 import { api } from "../../lib/axios.ts";
@@ -11,6 +11,8 @@ interface FormularioDeConsultaProps {
   adicionarMensagem: (mensagem: Mensagem) => void
   setMensagens: (mensagens: Mensagem[]) => void
   mensagens: Mensagem[]
+  formularioRef: React.MutableRefObject<null>
+  rolarParaSessaoDoFormulario: () => void
 }
 
 export function FormularioDeConsulta({
@@ -19,7 +21,9 @@ export function FormularioDeConsulta({
   adicionarMensagem,
   pacienteId,
   mensagens,
-  setMensagens
+  setMensagens,
+  formularioRef,
+  rolarParaSessaoDoFormulario,
 }: FormularioDeConsultaProps) {
   const [pressaoArterialDiastolica, setPressaoArterialDiastolica] = useState("")
   const [pressaoArterialSistolica, setPressaoArterialSistolica] = useState("")
@@ -36,6 +40,9 @@ export function FormularioDeConsulta({
   const statusDaTemperatura = calcularStatusDaCondicao("temperatura", Number(temperatura))
   const camposDoFormularioValidos = validarCamposDoFormulário()
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(rolarParaSessaoDoFormulario, [exibindoCheckBoxesDeSintomas])
+  
   function validarCamposDoFormulário() {
     if(!validarCondicao(pressaoArterialSistolica)) {
       return false
@@ -130,7 +137,7 @@ export function FormularioDeConsulta({
   }
 
   return (
-    <section className="p-4 bg-secondary-subtle mt-4">
+    <section ref={formularioRef} className="p-3 bg-secondary-subtle mt-4">
       <Form 
         onSubmit={handleSubmit}
       >

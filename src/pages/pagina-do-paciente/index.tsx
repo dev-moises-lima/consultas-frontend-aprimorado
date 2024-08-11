@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "react-bootstrap"
 import { BiPlus } from "react-icons/bi"
 import { GrReturn } from "react-icons/gr"
 import { FormularioDeConsulta } from "./formulario-de-consulta"
-import { InfoPaciente } from "./info-paciente";
+import { InfoPaciente } from "./info-paciente"
 import { TabelaDeConsultas } from "./tabela-de-consultas"
 import { Consulta, Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
 import { api } from "../../lib/axios"
@@ -29,6 +29,8 @@ export function PaginaDoPaciente({
   const [controleDeAtualizacaoDoPaciente, setControleDeAtualizacaoDoPaciente] = useState(false)
   const { pacienteId } = useParams()
   const navigate = useNavigate()
+  const formularioRef = useRef(null)
+  const infoPacienteRef = useRef(null)
 
 
   if(!pacienteExiste) {
@@ -36,6 +38,31 @@ export function PaginaDoPaciente({
       navigate("/")
     }, 3000)
   }
+
+  function rolarParaInfoPaciente() {
+    if(infoPacienteRef.current) {
+      console.log(infoPacienteRef);
+      
+      const sessaoInfoPaciente = infoPacienteRef.current as HTMLTableSectionElement
+      sessaoInfoPaciente.scrollIntoView({behavior: "smooth"})
+    }
+  }
+
+  function rolarParaSessaoDoFormulario() {
+    if(formularioRef.current) {
+      console.log(formularioRef)
+      const sessaoDoFormulario = formularioRef.current as HTMLTableSectionElement
+      sessaoDoFormulario.scrollIntoView({behavior: "smooth"})
+    }
+  }
+
+  useEffect(() => {
+    if(exibindoFormularioDeConsulta) {
+      rolarParaSessaoDoFormulario()
+    } else {
+      rolarParaInfoPaciente()
+    }
+  }, [exibindoFormularioDeConsulta])
 
   function exibirFormularioDeConsulta() {
     setMostrarFormularioDeConsulta(true)
@@ -122,10 +149,14 @@ export function PaginaDoPaciente({
         <>
           <InfoPaciente 
             paciente={paciente}
+            sectionRef={infoPacienteRef}
           />
 
           {exibindoFormularioDeConsulta ? 
               <FormularioDeConsulta
+                rolarParaSessaoDoFormulario={rolarParaSessaoDoFormulario}
+
+                formularioRef={formularioRef}
                 adicionarMensagem={adicionarMensagem}
                 emitirMensagemDeAtualizacaoDoPaciente={emitirMensagemDeAtualizacaoDoPaciente}
                 esconderFormularioDeConsulta={esconderFormularioDeConsulta}
@@ -138,7 +169,8 @@ export function PaginaDoPaciente({
                 <Button 
                   as="a" 
                   href="/" 
-                  size="lg">
+                  size="lg"
+                >
                   Voltar <GrReturn />
                 </Button>
 
