@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { ModalDeCadastroDePaciente } from "./modal-de-cadastro-de-paciente"
 import { TabelaDePacientes } from "./tabela-de-pacientes"
 import { Button } from "react-bootstrap"
@@ -6,15 +6,12 @@ import { api } from "../../lib/axios.ts"
 import { Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
 import { Notificacao } from "../../components/notificacao"
 import { AxiosError } from "axios"
+import { obterMensagemDeErro } from "../../lib/minhas-funcoes.ts"
+import { AppContext } from "../../context/AppContext.tsx"
 
-interface PaginaPrincipalProps
-{
-  setMensagemDeErro: (mensagem: string) => void
-}
 
-export function PaginaPrincipal({
-  setMensagemDeErro,
-}: PaginaPrincipalProps) {
+export function PaginaPrincipal() {
+  const { mensagemDeErroFatal, mudarMensagemDeErroFatal } = useContext(AppContext)
   const [modalDeCadastroAberto, setModalDeCadastroAberto] = useState(false)
   const [controleDeAtualizacaoDePacientes,setControleDeAtualizacaoDePacientes] = useState(false)
   const [pacientes, setPacientes] = useState<Paciente[]>()
@@ -24,32 +21,19 @@ export function PaginaPrincipal({
     try {
       const resposta = await api.get("pacientes")
       setPacientes(resposta.data)
-      setMensagemDeErro("")
+      console.log(mensagemDeErroFatal)
+      
+      mudarMensagemDeErroFatal("")
       console.log(resposta)
     } catch (erro) {
-      console.log(erro);
-      
+      console.log(erro)
       const axiosError = erro as AxiosError
-      const codigoDeErro = axiosError.code
-
-      switch(codigoDeErro)
-      {
-        case "ERR_BAD_REQUEST":
-          setMensagemDeErro("Recursos não encontrados no servidor")
-          break
-        case "ERR_BAD_RESPONSE":
-          setMensagemDeErro("Erro na resposta do servidor")
-          break
-        case "ERR_NETWORK":
-          setMensagemDeErro("Erro de conexão com o servidor")
-          break
-        default:
-          setMensagemDeErro(axiosError.message)
-      }
+      
+      mudarMensagemDeErroFatal(obterMensagemDeErro(axiosError))
 
       setTimeout(() => {
         obterPacientes()
-      }, 5000)
+      }, 3000)
     }
   }
 
@@ -101,9 +85,10 @@ export function PaginaPrincipal({
         }
         mensagens={mensagens}
         setMensagens={setMensagens}
-        setMensagemDeErro={setMensagemDeErro}
+        setMensagemDeErro={mudarMensagemDeErroFatal}
       />
       <TabelaDePacientes pacientes={pacientes} />
     </>
   );
 }
+

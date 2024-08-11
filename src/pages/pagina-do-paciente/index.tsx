@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { Button } from "react-bootstrap"
 import { BiPlus } from "react-icons/bi"
 import { GrReturn } from "react-icons/gr"
@@ -11,16 +11,10 @@ import { useNavigate, useParams } from "react-router-dom"
 import { Notificacao } from "../../components/notificacao"
 import { AxiosError } from "axios"
 import { obterMensagemDeErro } from "../../lib/minhas-funcoes"
+import { AppContext } from "../../context/AppContext"
 
-
-interface PaginaDoPacienteProps
-{
-  setMensagemDeErro: (mensagem: string) => void
-}
-
-export function PaginaDoPaciente({
-  setMensagemDeErro,
-}: PaginaDoPacienteProps) {
+export function PaginaDoPaciente() {
+  const { mudarMensagemDeErroFatal } = useContext(AppContext)
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
   const [exibindoFormularioDeConsulta, setMostrarFormularioDeConsulta] = useState(false)
   const [paciente, setPaciente] = useState<Paciente>()
@@ -87,20 +81,16 @@ export function PaginaDoPaciente({
   async function obterPaciente() {
     try {
       const resposta = await api.get(`pacientes/${pacienteId}`)
-
       setPaciente(resposta.data)
-      setMensagemDeErro("")
+      mudarMensagemDeErroFatal("")
       obterConsultas()
-    } catch (erro) {
-      console.log(erro)
-      
+    } catch (erro) {      
       const axiosError = erro as AxiosError
-      console.log(axiosError.response?.status);
       
       if(axiosError.code == "ERR_BAD_REQUEST" && axiosError.response?.status == 400) {
         setPacienteExiste(false)
       } else {
-        setMensagemDeErro(obterMensagemDeErro(axiosError))
+        mudarMensagemDeErroFatal(obterMensagemDeErro(axiosError))
         setTimeout(() => {
           obterPaciente()
         }, 3000)
@@ -111,16 +101,15 @@ export function PaginaDoPaciente({
   async function obterConsultas() {
     try {
       const resposta = await api.get(`pacientes/${pacienteId}/consultas`)
-      setMensagemDeErro("")
+      mudarMensagemDeErroFatal("")
       setConsultas(resposta.data)
     } catch (erro) {
-      console.log(erro)
       const axiosError = erro as AxiosError
       
       if(axiosError.code == "ERR_BAD_REQUEST" && axiosError.response?.status == 400) {
         setPacienteExiste(false)
       } else {
-        setMensagemDeErro(obterMensagemDeErro(axiosError))
+        mudarMensagemDeErroFatal(obterMensagemDeErro(axiosError))
         setTimeout(() => {
           obterPaciente()
         }, 3000)
@@ -167,8 +156,7 @@ export function PaginaDoPaciente({
             : (
               <div className="p-3 mt-3 bg-secondary-subtle justify-content-between d-flex">
                 <Button 
-                  as="a" 
-                  href="/" 
+                  onClick={() => navigate("/")}
                   size="lg"
                 >
                   Voltar <GrReturn />

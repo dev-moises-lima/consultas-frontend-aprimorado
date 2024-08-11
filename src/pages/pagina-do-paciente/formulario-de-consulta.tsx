@@ -1,8 +1,10 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import { Button, Col, FloatingLabel, Form, Row, Stack } from "react-bootstrap";
-import { calcularStatusDaCondicao, generateUUID } from "../../lib/minhas-funcoes";
+import { calcularStatusDaCondicao, generateUUID, obterMensagemDeErro } from "../../lib/minhas-funcoes";
 import { api } from "../../lib/axios.ts";
 import { ErrosDeRealizacaoDeConsulta, Mensagem } from "../../lib/minhas-interfaces-e-tipos";
+import { AppContext } from "../../context/AppContext.tsx";
+import { AxiosError } from "axios";
 
 interface FormularioDeConsultaProps {
   emitirMensagemDeAtualizacaoDoPaciente: () => void
@@ -25,6 +27,7 @@ export function FormularioDeConsulta({
   formularioRef,
   rolarParaSessaoDoFormulario,
 }: FormularioDeConsultaProps) {
+  const { mudarMensagemDeErroFatal } = useContext(AppContext)
   const [pressaoArterialDiastolica, setPressaoArterialDiastolica] = useState("")
   const [pressaoArterialSistolica, setPressaoArterialSistolica] = useState("")
   const [frequenciaCardiaca, setFrequenciaCardiaca] = useState("")
@@ -94,23 +97,30 @@ export function FormularioDeConsulta({
         emitirMensagemDeAtualizacaoDoPaciente()
         adicionarMensagem(novaMensagem)
         esconderFormularioDeConsulta()
-      }).catch(resposta => {
-        
-        const erros: ErrosDeRealizacaoDeConsulta = resposta.response.data.errors
+      }).catch(erro => {
+        const axiosError = erro as AxiosError
+        if(axiosError.code === "ERR_BAD_REQUEST" && axiosError.response?.status === 422) {
 
-        let novasMensagens: Mensagem[] = [];
+          const erros: ErrosDeRealizacaoDeConsulta = erro.response.data.errors
+          let novasMensagens: Mensagem[] = []
 
-        for (const mensagensDeErro of Object.values(erros)) {
-          const novasMensagensDeErro = mensagensDeErro.map(
-            (mensagemDeErro: string) => {
-              return [mensagemDeErro, "erro", generateUUID()]
-            }
-          )
+          for (const mensagensDeErro of Object.values(erros)) {
+            const novasMensagensDeErro = mensagensDeErro.map(
+              (mensagemDeErro: string) => {
+                return [mensagemDeErro, "erro", generateUUID()]
+              }
+            )
 
-          novasMensagens = [...novasMensagens, ...novasMensagensDeErro]
+            novasMensagens = [...novasMensagens, ...novasMensagensDeErro]
+          }
+
+          setMensagens([...novasMensagens, ...mensagens])
+        } else {
+          mudarMensagemDeErroFatal(obterMensagemDeErro(axiosError))
+          setTimeout(() => {
+            mudarMensagemDeErroFatal("")
+          }, 3000)
         }
-
-        setMensagens([...novasMensagens, ...mensagens])
 
         esconderFormularioDeConsulta()
       })

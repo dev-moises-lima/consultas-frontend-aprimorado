@@ -3,6 +3,7 @@ import { Paciente } from "../../lib/minhas-interfaces-e-tipos";
 import { Button } from "react-bootstrap";
 import { FaArrowRight } from "react-icons/fa";
 import { obterCorDaCondicao } from "../../lib/minhas-funcoes";
+import { useNavigate } from "react-router-dom";
 
 interface ItemDaTabelaPacientesProps {
   paciente: Paciente
@@ -11,6 +12,7 @@ interface ItemDaTabelaPacientesProps {
 export function ItemDaTabelaPacientes({
   paciente,
 }: ItemDaTabelaPacientesProps) {
+  const navigate = useNavigate()
   const hoje = moment()
   const dataDeNascimento = moment(paciente.data_de_nascimento, "YYYY/MM/DD")
   const idadeDoPaciente = hoje.diff(dataDeNascimento, "year")
@@ -26,7 +28,7 @@ export function ItemDaTabelaPacientes({
       <td className="align-middle">{paciente.cpf}</td>
       <td className="align-middle">{idadeDoPaciente}</td>
       <td className="text-center align-middle">
-        <Button className="w-75" as="a" href={`paciente/${paciente.id}`}>
+        <Button className="w-75" onClick={() => navigate(`paciente/${paciente.id}`)}>
           <FaArrowRight />
         </Button>
       </td>

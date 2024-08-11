@@ -1,9 +1,10 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useContext, useState } from "react";
 import { Button, Form, Stack } from "react-bootstrap";
 import { cpf as cpfValidator } from "cpf-cnpj-validator";
 import {
   generateUUID,
   inverterData,
+  obterMensagemDeErro,
   validarDataDeNascimento,
 } from "../../lib/minhas-funcoes";
 import { api } from "../../lib/axios.ts";
@@ -13,6 +14,7 @@ import {
   Mensagem,
 } from "../../lib/minhas-interfaces-e-tipos"
 import { AxiosError } from "axios";
+import { AppContext } from "../../context/AppContext.tsx";
 
 interface FormularioDeCadastroDePacienteProps {
   fecharModalDeCadastro: () => void
@@ -27,8 +29,8 @@ export function FormularioDeCadastroDePaciente({
   mensagens,
   setMensagens,
   emitirMensagemDeAtualizacaoDePacientes,
-  setMensagemDeErro,
 }: FormularioDeCadastroDePacienteProps) {
+  const { mudarMensagemDeErroFatal } = useContext(AppContext)
   const [formularioValidado, setFormularioValidado] = useState(false)
   const [nome, setNome] = useState("")
   const [cpf, setCpf] = useState("")
@@ -84,7 +86,7 @@ export function FormularioDeCadastroDePaciente({
 
     dados.set("data_de_nascimento", dataDeNascimento)
 
-    api.post("pacientese", dados)
+    api.post("pacientes", dados)
       .then((resposta) => {
         console.log(resposta);
         
@@ -100,11 +102,8 @@ export function FormularioDeCadastroDePaciente({
         fecharModalDeCadastro()
         const axiosError = erro as AxiosError
         
-        switch(axiosError.code)
-        {
-          case "ERR_BAD_REQUEST": {
-            if(axiosError.response?.status === 422) {
-              const erros: ErrosDeCadastroDePaciente = erro.response.data.errors
+        if(axiosError.code === "ERR_BAD_REQUEST" && axiosError.response?.status === 422) {
+          const erros: ErrosDeCadastroDePaciente = erro.response.data.errors
 
               let novasMensagens: Mensagem[] = []
 
@@ -119,24 +118,12 @@ export function FormularioDeCadastroDePaciente({
               }
 
             setMensagens([...novasMensagens, ...mensagens])
-            } else {
-              setMensagemDeErro("Erro na requisição ao servidor")
-            }
-            break
-          }
-          case "ERR_BAD_RESPONSE":
-            setMensagemDeErro("Erro na resposta do servidor")
-            break
-          case "ERR_NETWORK":
-            setMensagemDeErro("Erro de conexão com o servidor")
-            break
-          default:
-            setMensagemDeErro(axiosError.message)  
+        } else {
+          mudarMensagemDeErroFatal(obterMensagemDeErro(axiosError))
+          setTimeout(() => {
+            mudarMensagemDeErroFatal("")
+          }, 5000)
         }
-        
-        setTimeout(() => {
-          setMensagemDeErro("")
-        }, 5000)
       })
   }
 
