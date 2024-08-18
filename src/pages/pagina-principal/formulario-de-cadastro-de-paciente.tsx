@@ -21,14 +21,12 @@ interface FormularioDeCadastroDePacienteProps {
   setMensagens: (mensagens: Mensagem[]) => void
   setMensagemDeErro: (mensagen: string) => void
   mensagens: Mensagem[]
-  emitirMensagemDeAtualizacaoDePacientes: () => void
 }
 
 export function FormularioDeCadastroDePaciente({
   fecharModalDeCadastro,
   mensagens,
   setMensagens,
-  emitirMensagemDeAtualizacaoDePacientes,
 }: FormularioDeCadastroDePacienteProps) {
   const { mudarMensagemDeErroFatal } = useContext(AppContext)
   const [formularioValidado, setFormularioValidado] = useState(false)
@@ -96,7 +94,6 @@ export function FormularioDeCadastroDePaciente({
         ])
         setBotaoCadastrarAtivo(true)
         fecharModalDeCadastro()
-        emitirMensagemDeAtualizacaoDePacientes()
       })
       .catch((erro) => {
         fecharModalDeCadastro()

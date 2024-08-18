@@ -1,3 +1,8 @@
+export interface PacienteCadastradoEvento
+{
+  paciente: Paciente
+}
+
 export interface Paciente {
   id: number
   nome: string

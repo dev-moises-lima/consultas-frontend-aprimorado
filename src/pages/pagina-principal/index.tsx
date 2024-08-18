@@ -3,26 +3,33 @@ import { ModalDeCadastroDePaciente } from "./modal-de-cadastro-de-paciente"
 import { TabelaDePacientes } from "./tabela-de-pacientes"
 import { Button } from "react-bootstrap"
 import { api } from "../../lib/axios.ts"
-import { Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
+import { Mensagem, Paciente, PacienteCadastradoEvento } from "../../lib/minhas-interfaces-e-tipos"
 import { Notificacao } from "../../components/notificacao"
 import { AxiosError } from "axios"
 import { obterMensagemDeErro } from "../../lib/minhas-funcoes.ts"
 import { AppContext } from "../../context/AppContext.tsx"
+import { atualizacoes } from "../../lib/pusher.ts"
 
 
 export function PaginaPrincipal() {
-  const { mensagemDeErroFatal, mudarMensagemDeErroFatal } = useContext(AppContext)
+  const { mudarMensagemDeErroFatal } = useContext(AppContext)
   const [modalDeCadastroAberto, setModalDeCadastroAberto] = useState(false)
-  const [controleDeAtualizacaoDePacientes,setControleDeAtualizacaoDePacientes] = useState(false)
   const [pacientes, setPacientes] = useState<Paciente[]>()
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
+  console.log(pacientes)
   
+  atualizacoes.bind('paciente-cadastrado', ({ paciente }: PacienteCadastradoEvento) => {
+    if(pacientes === undefined) {
+      return
+    }
+
+    setPacientes([...pacientes, paciente])
+  })
+
   async function obterPacientes() {
     try {
       const resposta = await api.get("pacientes")
       setPacientes(resposta.data)
-      console.log(mensagemDeErroFatal)
-      
       mudarMensagemDeErroFatal("")
       console.log(resposta)
     } catch (erro) {
@@ -39,8 +46,7 @@ export function PaginaPrincipal() {
 
   useEffect(() => {
     obterPacientes()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controleDeAtualizacaoDePacientes])
+  }, [])
 
   function removerMensagem(codigoDaMensagem: string) {
     setMensagens(
@@ -54,10 +60,6 @@ export function PaginaPrincipal() {
 
   function abrirModalDeCadastro() {
     setModalDeCadastroAberto(true)
-  }
-
-  function emitirMensagemDeAtualizacaoDePacientes() {
-    setControleDeAtualizacaoDePacientes(!controleDeAtualizacaoDePacientes)
   }
 
   return (
@@ -80,9 +82,6 @@ export function PaginaPrincipal() {
       <ModalDeCadastroDePaciente
         modalDeCadastroAberto={modalDeCadastroAberto}
         fecharModalDeCadastro={fecharModalDeCadastro}
-        emitirMensagemDeAtualizacaoDePacientes={
-          emitirMensagemDeAtualizacaoDePacientes
-        }
         mensagens={mensagens}
         setMensagens={setMensagens}
         setMensagemDeErro={mudarMensagemDeErroFatal}
