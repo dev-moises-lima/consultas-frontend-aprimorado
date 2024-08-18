@@ -1,6 +1,6 @@
-import { Modal } from "react-bootstrap";
-import { FormularioDeCadastroDePaciente } from "./formulario-de-cadastro-de-paciente";
-import { Mensagem } from "../../lib/minhas-interfaces-e-tipos";
+import { Modal } from "react-bootstrap"
+import { FormularioDeCadastroDePaciente } from "./formulario-de-cadastro-de-paciente"
+import { Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
 
 interface ModalDeCadastroDePacienteProps {
   modalDeCadastroAberto: boolean
@@ -8,6 +8,7 @@ interface ModalDeCadastroDePacienteProps {
   setMensagens: (mensagens: Mensagem[]) => void
   mensagens: Mensagem[]
   setMensagemDeErro: (mensagen: string) => void
+  adicionarPaciente: (paciente: Paciente) => void
 }
 
 export function ModalDeCadastroDePaciente({
@@ -16,6 +17,7 @@ export function ModalDeCadastroDePaciente({
   mensagens,
   setMensagens,
   setMensagemDeErro,
+  adicionarPaciente,
 }: ModalDeCadastroDePacienteProps) {
   return (
     <Modal
@@ -34,6 +36,7 @@ export function ModalDeCadastroDePaciente({
           mensagens={mensagens}
           setMensagens={setMensagens}
           setMensagemDeErro={setMensagemDeErro}
+          adicionarPaciente={adicionarPaciente}
         />
       </Modal.Body>
     </Modal>

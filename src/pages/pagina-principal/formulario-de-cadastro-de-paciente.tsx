@@ -1,32 +1,34 @@
-import { ChangeEvent, FormEvent, useContext, useState } from "react";
-import { Button, Form, Stack } from "react-bootstrap";
-import { cpf as cpfValidator } from "cpf-cnpj-validator";
+import { ChangeEvent, FormEvent, useContext, useState } from "react"
+import { Button, Form, Stack } from "react-bootstrap"
+import { cpf as cpfValidator } from "cpf-cnpj-validator"
 import {
   generateUUID,
   inverterData,
   obterMensagemDeErro,
   validarDataDeNascimento,
-} from "../../lib/minhas-funcoes";
-import { api } from "../../lib/axios.ts";
-import { useMask } from "@react-input/mask";
+} from "../../lib/minhas-funcoes"
+import { api } from "../../lib/axios.ts"
+import { useMask } from "@react-input/mask"
 import {
   ErrosDeCadastroDePaciente,
   Mensagem,
+  Paciente,
 } from "../../lib/minhas-interfaces-e-tipos"
-import { AxiosError } from "axios";
-import { AppContext } from "../../context/AppContext.tsx";
+import { AxiosError } from "axios"
+import { AppContext } from "../../context/AppContext.tsx"
 
 interface FormularioDeCadastroDePacienteProps {
   fecharModalDeCadastro: () => void
   setMensagens: (mensagens: Mensagem[]) => void
-  setMensagemDeErro: (mensagen: string) => void
   mensagens: Mensagem[]
+  adicionarPaciente: (paciente: Paciente) => void
 }
 
 export function FormularioDeCadastroDePaciente({
   fecharModalDeCadastro,
   mensagens,
   setMensagens,
+  adicionarPaciente,
 }: FormularioDeCadastroDePacienteProps) {
   const { mudarMensagemDeErroFatal } = useContext(AppContext)
   const [formularioValidado, setFormularioValidado] = useState(false)
@@ -86,8 +88,8 @@ export function FormularioDeCadastroDePaciente({
 
     api.post("pacientes", dados)
       .then((resposta) => {
-        console.log(resposta);
-        
+        const novoPaciente: Paciente = resposta.data.paciente 
+        adicionarPaciente(novoPaciente)
         setMensagens([
           [resposta.data.mensagem, "sucesso", generateUUID()],
           ...mensagens,

@@ -8,7 +8,6 @@ import { Notificacao } from "../../components/notificacao"
 import { AxiosError } from "axios"
 import { obterMensagemDeErro } from "../../lib/minhas-funcoes.ts"
 import { AppContext } from "../../context/AppContext.tsx"
-import { atualizacoes } from "../../lib/pusher.ts"
 
 
 export function PaginaPrincipal() {
@@ -18,12 +17,11 @@ export function PaginaPrincipal() {
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
   console.log(pacientes)
   
-  atualizacoes.bind('paciente-cadastrado', ({ paciente }: PacienteCadastradoEvento) => {
-    if(pacientes === undefined) {
-      return
-    }
-
-    setPacientes([...pacientes, paciente])
+  window.Echo.channel('atualizacoes')
+    .listen('.paciente-cadastrado', (event: PacienteCadastradoEvento) => {
+      console.log(event)
+      if(pacientes === undefined) return
+      adicionarPaciente(event.paciente)
   })
 
   async function obterPacientes() {
@@ -47,6 +45,11 @@ export function PaginaPrincipal() {
   useEffect(() => {
     obterPacientes()
   }, [])
+
+
+  function adicionarPaciente(paciente: Paciente) {
+    setPacientes([...pacientes!, paciente])
+  }
 
   function removerMensagem(codigoDaMensagem: string) {
     setMensagens(
@@ -85,6 +88,7 @@ export function PaginaPrincipal() {
         mensagens={mensagens}
         setMensagens={setMensagens}
         setMensagemDeErro={mudarMensagemDeErroFatal}
+        adicionarPaciente={adicionarPaciente}
       />
       <TabelaDePacientes pacientes={pacientes} />
     </>
