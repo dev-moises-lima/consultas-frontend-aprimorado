@@ -17,9 +17,16 @@ export function obterMensagemDeErro (axiosError: AxiosError)
   }
 }
 
-
 export function inverterData(data: string, separador: string) {
   return data.split(separador).reverse().join(separador)
+}
+
+export function validarDataDeNascimento(data: string) {
+  if(data.length < 10) return false
+
+  const novaData = moment(data, "YYYY-MM-DD")
+
+  return novaData.isValid() && novaData.isBefore(moment(), "day")
 }
 
 export function obterCorDaCondicao (condicao: CondicaoDoPaciente) {
@@ -147,12 +154,4 @@ export function calcularStatusDaCondicao(condicaoAVerificar: condicao, valorDaCo
   }
 
   return ["Classificação nâo identificada", "secondary"]
-}
-
-export function validarDataDeNascimento(data: string) {
-  if(data.length < 10) return false
-
-  const novaData = moment(data, "YYYY-MM-DD")
-
-  return novaData.isValid() && novaData.isBefore(moment(), "day")
 }

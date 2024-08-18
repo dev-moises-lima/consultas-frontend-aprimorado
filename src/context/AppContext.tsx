@@ -2,8 +2,7 @@ import { createContext, ReactNode, useState } from "react"
 
 const appContextDefaultValue = {
   mensagemDeErroFatal: "",
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  mudarMensagemDeErroFatal: (_novaMensagemDeErroFatal: string) => {}
+  mudarMensagemDeErroFatal: (novaMensagemDeErroFatal: string) => {console.log(novaMensagemDeErroFatal)}
 }
 
 export const AppContext = createContext(appContextDefaultValue)

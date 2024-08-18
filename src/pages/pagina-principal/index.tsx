@@ -17,12 +17,12 @@ export function PaginaPrincipal() {
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
   console.log(pacientes)
   
-  window.Echo.channel('atualizacoes')
-    .listen('.paciente-cadastrado', (event: PacienteCadastradoEvento) => {
+  const atualizacoesGerais =  window.Echo.channel('atualizacoes-gerais')
+
+  atualizacoesGerais.listen('.paciente-cadastrado', (event: PacienteCadastradoEvento) => {
       console.log(event)
-      if(pacientes === undefined) return
       adicionarPaciente(event.paciente)
-  })
+   })
 
   async function obterPacientes() {
     try {
@@ -44,11 +44,16 @@ export function PaginaPrincipal() {
 
   useEffect(() => {
     obterPacientes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
   function adicionarPaciente(paciente: Paciente) {
-    setPacientes([...pacientes!, paciente])
+    if(pacientes === undefined) {
+      return
+    }
+
+    setPacientes([...pacientes, paciente])
   }
 
   function removerMensagem(codigoDaMensagem: string) {

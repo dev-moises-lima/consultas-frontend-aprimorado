@@ -5,7 +5,7 @@ import { GrReturn } from "react-icons/gr"
 import { FormularioDeConsulta } from "./formulario-de-consulta"
 import { InfoPaciente } from "./info-paciente"
 import { TabelaDeConsultas } from "./tabela-de-consultas"
-import { Consulta, Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
+import { Consulta, ConsultaCadastradaEvento, Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
 import { api } from "../../lib/axios"
 import { useNavigate, useParams } from "react-router-dom"
 import { Notificacao } from "../../components/notificacao"
@@ -20,12 +20,22 @@ export function PaginaDoPaciente() {
   const [paciente, setPaciente] = useState<Paciente>()
   const [pacienteExiste, setPacienteExiste] = useState(true)
   const [consultas, setConsultas] = useState<Consulta[]>()
-  const [controleDeAtualizacaoDoPaciente, setControleDeAtualizacaoDoPaciente] = useState(false)
   const { pacienteId } = useParams()
   const navigate = useNavigate()
   const formularioRef = useRef(null)
   const infoPacienteRef = useRef(null)
+  
+  function handleConsultaCadastrada({
+    consulta,
+    paciente,
+  }: ConsultaCadastradaEvento) {
+    setPaciente(paciente)
+    adicionarConsulta(consulta)
+  }
 
+  const atualizacoesDoPaciente = window.Echo.channel(`atualizacoes-do-paciente-${pacienteId}`)
+  
+  atualizacoesDoPaciente.listen('.consulta-cadastrada', handleConsultaCadastrada)
 
   if(!pacienteExiste) {
     setTimeout(() => {
@@ -33,10 +43,16 @@ export function PaginaDoPaciente() {
     }, 3000)
   }
 
+  function adicionarConsulta(consulta: Consulta) {
+    if(consultas === undefined) {
+      return
+    }
+
+    setConsultas([...consultas, consulta])
+  }
+
   function rolarParaInfoPaciente() {
-    if(infoPacienteRef.current) {
-      console.log(infoPacienteRef);
-      
+    if(infoPacienteRef.current) {      
       const sessaoInfoPaciente = infoPacienteRef.current as HTMLTableSectionElement
       sessaoInfoPaciente.scrollIntoView({behavior: "smooth"})
     }
@@ -44,7 +60,6 @@ export function PaginaDoPaciente() {
 
   function rolarParaSessaoDoFormulario() {
     if(formularioRef.current) {
-      console.log(formularioRef)
       const sessaoDoFormulario = formularioRef.current as HTMLTableSectionElement
       sessaoDoFormulario.scrollIntoView({behavior: "smooth"})
     }
@@ -72,10 +87,6 @@ export function PaginaDoPaciente() {
 
   function adicionarMensagem(mensagem: Mensagem) {
     setMensagens([...mensagens, mensagem])
-  }
-
-  function emitirMensagemDeAtualizacaoDoPaciente() {
-    setControleDeAtualizacaoDoPaciente(!controleDeAtualizacaoDoPaciente)
   }
 
   async function obterPaciente() {
@@ -120,7 +131,7 @@ export function PaginaDoPaciente() {
   useEffect(() => {
     obterPaciente()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controleDeAtualizacaoDoPaciente, pacienteId])
+  }, [pacienteId])
 
 
   return (
@@ -144,14 +155,14 @@ export function PaginaDoPaciente() {
           {exibindoFormularioDeConsulta ? 
               <FormularioDeConsulta
                 rolarParaSessaoDoFormulario={rolarParaSessaoDoFormulario}
-
                 formularioRef={formularioRef}
                 adicionarMensagem={adicionarMensagem}
-                emitirMensagemDeAtualizacaoDoPaciente={emitirMensagemDeAtualizacaoDoPaciente}
                 esconderFormularioDeConsulta={esconderFormularioDeConsulta}
                 pacienteId={pacienteId!}
                 mensagens={mensagens}
                 setMensagens={setMensagens}
+                adicionarConsulta={adicionarConsulta}
+                setPaciente={setPaciente}
               />
             : (
               <div className="p-3 mt-3 bg-secondary-subtle justify-content-between d-flex">

@@ -1,13 +1,12 @@
-import { FormEvent, useContext, useEffect, useState } from "react";
-import { Button, Col, FloatingLabel, Form, Row, Stack } from "react-bootstrap";
-import { calcularStatusDaCondicao, generateUUID, obterMensagemDeErro } from "../../lib/minhas-funcoes";
-import { api } from "../../lib/axios.ts";
-import { ErrosDeRealizacaoDeConsulta, Mensagem } from "../../lib/minhas-interfaces-e-tipos";
-import { AppContext } from "../../context/AppContext.tsx";
-import { AxiosError } from "axios";
+import { FormEvent, useContext, useEffect, useState } from "react"
+import { Button, Col, FloatingLabel, Form, Row, Stack } from "react-bootstrap"
+import { calcularStatusDaCondicao, generateUUID, obterMensagemDeErro } from "../../lib/minhas-funcoes"
+import { api } from "../../lib/axios.ts"
+import { Consulta, ErrosDeRealizacaoDeConsulta, Mensagem, Paciente } from "../../lib/minhas-interfaces-e-tipos"
+import { AppContext } from "../../context/AppContext.tsx"
+import { AxiosError } from "axios"
 
 interface FormularioDeConsultaProps {
-  emitirMensagemDeAtualizacaoDoPaciente: () => void
   esconderFormularioDeConsulta: () => void
   pacienteId: string
   adicionarMensagem: (mensagem: Mensagem) => void
@@ -15,10 +14,11 @@ interface FormularioDeConsultaProps {
   mensagens: Mensagem[]
   formularioRef: React.MutableRefObject<null>
   rolarParaSessaoDoFormulario: () => void
+  adicionarConsulta: (consulta: Consulta) => void
+  setPaciente: (paciente: Paciente) => void
 }
 
 export function FormularioDeConsulta({
-  emitirMensagemDeAtualizacaoDoPaciente,
   esconderFormularioDeConsulta,
   adicionarMensagem,
   pacienteId,
@@ -26,6 +26,8 @@ export function FormularioDeConsulta({
   setMensagens,
   formularioRef,
   rolarParaSessaoDoFormulario,
+  adicionarConsulta,
+  setPaciente,
 }: FormularioDeConsultaProps) {
   const { mudarMensagemDeErroFatal } = useContext(AppContext)
   const [pressaoArterialDiastolica, setPressaoArterialDiastolica] = useState("")
@@ -93,8 +95,9 @@ export function FormularioDeConsulta({
     api.post(`/consulta/${pacienteId}`, dados)
       .then(resposta => {
         const novaMensagem: Mensagem = [resposta.data.mensagem, "sucesso", generateUUID()]
-
-        emitirMensagemDeAtualizacaoDoPaciente()
+        const novaConsulta: Consulta = resposta.data.consulta
+        setPaciente(resposta.data.paciente as Paciente)
+        adicionarConsulta(novaConsulta)
         adicionarMensagem(novaMensagem)
         esconderFormularioDeConsulta()
       }).catch(erro => {

@@ -15,7 +15,6 @@ window.Echo = new Echo({
   encrypted: true,
 })
 
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AppProvider>

@@ -1,8 +1,3 @@
-export interface PacienteCadastradoEvento
-{
-  paciente: Paciente
-}
-
 export interface Paciente {
   id: number
   nome: string
@@ -25,6 +20,17 @@ export interface Consulta {
   pressao_arterial_diastolica: number
 }
 
+export interface ConsultaCadastradaEvento
+{
+  consulta: Consulta
+  paciente: Paciente
+}
+
+export interface PacienteCadastradoEvento
+{
+  paciente: Paciente
+}
+
 export interface ErrosDeCadastroDePaciente {
   nome? : string[]
   cpf? : string[]
@@ -41,8 +47,6 @@ export interface ErrosDeRealizacaoDeConsulta {
   respiracao?: string[]
   temperatura?: string[]
 }
-
-export type ErroDeRequisicao = "ERR_BAD_REQUEST" | "ERR_NETWORK" | "ERR_BAD_RESPONSE"
 
 export type Mensagem = [string, "erro" | "sucesso", string]
 
